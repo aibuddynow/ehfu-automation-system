@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EHFU Production Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0D1B2A;
+    --navy2: #1A2B4A;
+    --gold: #D4A843;
+    --gold2: #F0C060;
+    --cream: #F5F0E8;
+    --muted: #8A9BB5;
+    --success: #2ECC71;
+    --danger: #E74C3C;
+    --card: #141F2E;
+    --border: rgba(212,168,67,0.15);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212,168,67,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,168,67,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .brand-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .brand-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--cream);
+    line-height: 1;
+  }
+
+  .brand-title span { color: var(--gold); }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-top: 4px;
+  }
+
+  .invideo-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .invideo-btn:hover { background: var(--gold2); transform: translateY(-1px); }
+  .invideo-btn:active { transform: scale(0.98); }
+
+  /* Stats bar */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* Channel tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .tab:hover { border-color: var(--gold); color: var(--gold); }
+  .tab.active { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 500; }
+
+  /* Prompt card */
+  .prompt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: fadeUp 0.6s 0.2s ease both;
+    margin-bottom: 20px;
+  }
+
+  .prompt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(212,168,67,0.04);
+  }
+
+  .prompt-meta { display: flex; flex-direction: column; gap: 3px; }
+
+  .prompt-channel {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .prompt-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .prompt-actions { display: flex; gap: 8px; }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+  .copy-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: var(--gold);
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .copy-all-btn:hover { background: var(--gold2); }
+  .copy-all-btn.copied { background: var(--success); color: white; }
+
+  .prompt-body {
+    padding: 20px;
+    max-height: 380px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .prompt-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.9;
+    color: rgba(245,240,232,0.75);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prompt-text .highlight { color: var(--gold); font-weight: 500; }
+
+  /* Checklist */
+  .checklist-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s 0.25s ease both;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .check-item:hover { border-color: rgba(212,168,67,0.3); }
+  .check-item.done { border-color: rgba(46,204,113,0.3); }
+
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--muted);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-size: 10px;
+  }
+
+  .check-item.done .check-box {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .check-label {
+    font-size: 12px;
+    color: var(--muted);
+    transition: color 0.15s;
+  }
+
+  .check-item.done .check-label {
+    color: var(--success);
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  .reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Quick links */
+  .quick-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .quick-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .quick-link:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+  .quick-link-icon { font-size: 20px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar */
+  .prompt-body::-webkit-scrollbar { width: 4px; }
+  .prompt-body::-webkit-scrollbar-track { background: transparent; }
+  .prompt-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="brand">
+      <div class="brand-tag">Production Launcher v1.0</div>
+      <div class="brand-title">EHFU <span>Systems</span></div>
+    </div>
+    <div class="header-actions">
+      <a href="https://invideo.io" target="_blank" class="invideo-btn">
+        ▶ Open InVideo
+      </a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val" id="daysLeft">—</div>
+      <div class="stat-lbl">days to Father's Day</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">3</div>
+      <div class="stat-lbl">videos this weekend</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">June 14</div>
+      <div class="stat-lbl">order deadline</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="checkedCount">0/10</div>
+      <div class="stat-lbl">checklist done</div>
+    </div>
+  </div>
+
+  <div style="background:#141F2E;border:1px solid rgba(212,168,67,0.15);border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#D4A843;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Step 1 — Paste this FIRST in every new InVideo project</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11.5px;line-height:1.9;color:rgba(245,240,232,0.75);white-space:pre-wrap;margin-bottom:12px;" id="prePromptText">You are a professional YouTube video production team. Your role is to create a high-quality, engaging YouTube video that drives real results.
+
+PRODUCTION STANDARDS:
+- Voiceover: Warm, confident, encouraging American voice. Natural conversational pace. Never robotic.
+- Subtitles: Word-for-word, fully synced to voiceover throughout entire video.
+- Music: YouTube licensed background music at 15-20% volume. Never overpowers voiceover.
+- Visuals: High quality stock footage matched precisely to the voiceover content in each scene.
+- Format: 16:9 landscape, 1080p, YouTube-optimized.
+- Do NOT summarize scenes — write full voiceover for every scene. Minimum 1,000 words total.
+- Do NOT skip scenes — every scene listed must be fully produced.
+- After generating, do NOT ask for confirmation — produce the complete video.</div>
+    <button class="copy-btn" id="copyPreBtn" onclick="copyPre()" style="border-color:rgba(212,168,67,0.4);color:#D4A843;">⎘ Copy pre-prompt</button>
+    <span id="preCopied" style="font-family:'DM Mono',monospace;font-size:11px;color:#2ECC71;display:none;margin-left:10px;">Copied! Paste into InVideo first.</span>
+  </div>
+
+  <div style="font-family:'DM Mono',monospace;font-size:11px;color:#8A9BB5;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Step 2 — Select channel and paste scene prompt</div>
+  <div class="tabs" id="tabs"></div>
+  <div class="prompt-card" id="promptCard"></div>
+
+  <div class="checklist-section">
+    <div class="section-label">Pre-publish checklist — reset per video</div>
+    <div class="check-grid" id="checkGrid"></div>
+    <button class="reset-btn" onclick="resetChecks()">↺ Reset for next video</button>
+  </div>
+
+  <div class="quick-links">
+    <a href="https://invideo.io" target="_blank" class="quick-link">
+      <span class="quick-link-icon">🎬</span>InVideo
+    </a>
+    <a href="https://studio.youtube.com" target="_blank" class="quick-link">
+      <span class="quick-link-icon">📺</span>YT Studio
+    </a>
+    <a href="https://canva.com" target="_blank" class="quick-link">
+      <span class="quick-link-icon">🎨</span>Canva
+    </a>
+    <a href="https://claude.ai" target="_blank" class="quick-link">
+      <span class="quick-link-icon">🤖</span>Claude
+    </a>
+    <a href="https://admin.shopify.com" target="_blank" class="quick-link">
+      <span class="quick-link-icon">🛍️</span>Shopify
+    </a>
+    <a href="https://make.com" target="_blank" class="quick-link">
+      <span class="quick-link-icon">⚙️</span>Make.com
+    </a>
+    <a href="https://vidiq.com" target="_blank" class="quick-link">
+      <span class="quick-link-icon">📊</span>VidIQ
+    </a>
+    <a href="https://airtable.com" target="_blank" class="quick-link">
+      <span class="quick-link-icon">📋</span>Airtable
+    </a>
+  </div>
+
+</div>
+<script>
+// Days until Father's Day
+const fd = new Date('2026-06-21');
+const today = new Date();
+document.getElementById('daysLeft').textContent = Math.ceil((fd - today) / (1000*60*60*24));
+
+const channels = [
+  {
+    id: 'ehfu',
+    name: 'Everything Happens For Us',
+    ytTitle: "The Truth About Father's Day Gifts Nobody Will Tell You (2026)",
+    prompt: `Create a 7-minute YouTube video with 12 scenes. Total word count must be 1,000 words minimum. Do not summarize — write full voiceover for every scene.
+
+VIDEO TITLE: The Truth About Father's Day Gifts Nobody Will Tell You (2026)
+
+CHANNEL TONE: Confident, trustworthy, slightly contrarian. Like a friend who done the research so you don't have to.
+
+BACKGROUND MUSIC: Upbeat but calm. Fade under voiceover. Increase volume during transitions.
+
+SCENE 1 — HOOK [0:00-0:35] [60 words]
+Voiceover: Every year millions of people waste money on Father's Day gifts dads secretly hate. Socks. Tools he already has. Another gift card. I tested 7 gifts that dads actually want — and two of them are under 50 dollars. Stay with me because number 4 is the one most people never think of.
+Visuals: Fast cuts of generic bad gifts — socks, tools, gift cards. Then slow reveal of premium gift boxes with ribbons.
+
+SCENE 2 — CREDIBILITY [0:35-1:10] [55 words]
+Voiceover: Quick background — I run an online store that ships these exact products. I see what people buy, what they return, and what makes dads actually light up when they open it. Everything in this video ships gift-ready and arrives before Father's Day if you order by June 14th.
+Visuals: Store logo, product images, order confirmation screen, shipping box with ribbon.
+
+SCENE 3 — GIFT 1: WATCH $89.95 [1:10-2:00] [70 words]
+Voiceover: Gift number one — and honestly this is the one I would give my own dad. This black chronograph watch comes in a mahogany luxury gift box. Under 90 dollars. When he opens that box it looks like you spent three hundred. The watch face is clean, the weight feels premium, and the box presentation alone makes it a moment he will remember.
+Visuals: Watch close-up on velvet, mahogany box opening slowly, price badge overlay $89.95, gift wrap detail.
+
+SCENE 4 — GIFT 2: CROSS NECKLACE $79.95 [2:00-2:45] [65 words]
+Voiceover: Gift number two is for the dad whose faith matters to him. This polished stainless steel cross necklace arrives in a luxury box and it will not tarnish, rust, or fade. Ever. It tells him you paid attention to who he actually is — not just what he likes. Under 80 dollars and it ships gift-ready.
+Visuals: Cross necklace on dark velvet, luxury box, stainless steel close-up, faith imagery, price badge $79.95.
+
+SCENE 5 — GIFT 3: LEATHER WALLET $69.95 [2:45-3:30] [65 words]
+Voiceover: Gift number three — every dad needs a wallet and most dads have a terrible one they have been carrying since 2015. This full-grain leather slim wallet ships in a gift box and gets used every single day. Not just on Father's Day. Under 70 dollars. Practical, personal, and actually appreciated.
+Visuals: Wallet fanning open, slim profile side view, card slots detail, gift box packaging, price badge $69.95.
+
+SCENE 6 — AFFILIATE MID-ROLL [3:30-4:00] [50 words]
+Voiceover: Quick sidebar — if you are building any kind of online income alongside your regular life, I use VidIQ on all my YouTube channels. It shows me exactly what people are searching for before I make a video. Free to start. Link is in the description below.
+Visuals: VidIQ logo, keyword research screenshot, YouTube analytics dashboard, description link highlight.
+
+SCENE 7 — GIFT 4: ENGRAVED DOG TAG $54.95 [4:00-4:45] [65 words]
+Voiceover: Gift number four — a custom engraved military style dog tag with his name, a date, or a message that means something to your family. Bold. Masculine. Completely unique. Under 55 dollars. This is the gift that sits on his dresser and means something every single time he looks at it.
+Visuals: Dog tag engraving close-up, military chain detail, name engraving, lifestyle shot on dresser, price badge $54.95.
+
+SCENE 8 — GIFT 5: DAD BRACELET $44.95 [4:45-5:20] [60 words]
+Voiceover: Gift number five — for the dad who actually wears jewelry. This two-tone stainless steel bracelet is adjustable, arrives in a gift box, and hits different when it has Love You Forever right on the clasp. Under 45 dollars. The kind of thing he puts on and never takes off.
+Visuals: Bracelet on wrist, two-tone detail close-up, clasp engraving, gift box reveal, price badge $44.95.
+
+SCENE 9 — GIFT 6: LED ACRYLIC PLAQUE $39.95 [5:20-5:55] [60 words]
+Voiceover: Gift number six gets emotional. This LED acrylic plaque glows on his desk and sits there every single day as a reminder of how much you love him. Under 40 dollars. The LED base is clean, the glow is beautiful, and it is the kind of gift he will never throw away.
+Visuals: Plaque glowing in dark room, desk setting close-up, LED base detail, family photo insert, price badge $39.95.
+
+SCENE 10 — GIFT 7: LEATHER JOURNAL $29.95 [5:55-6:25] [55 words]
+Voiceover: Gift number seven — best budget pick in this entire list. Under 30 dollars. Premium leather journal for the dad who is always writing things down, setting goals, or just needs somewhere to put his thoughts. Graphic design, gift-packaged, ships fast. Best value pick hands down.
+Visuals: Journal cover close-up, pages flipping, quality stitching detail, gift packaging, price badge $29.95, BEST VALUE badge overlay.
+
+SCENE 11 — URGENCY [6:25-6:45] [40 words]
+Voiceover: All seven of these ship in time for Father's Day — but only if you order by June 14th. That is the cutoff date. After that you are risking a late delivery. Every link is in the description below.
+Visuals: Calendar with June 14 circled in red, countdown graphic, all 7 products in a grid mosaic.
+
+SCENE 12 — CLOSE + SUBSCRIBE [6:45-7:00] [35 words]
+Voiceover: If this helped you out, hit subscribe. I drop content like this every single week. See you in the next one.
+Visuals: Subscribe animation, channel logo, end screen with related video thumbnail, description link highlight.`
+  },
+  {
+    id: 'ngf',
+    name: 'NerdGettingFit',
+    ytTitle: "Fitness Gifts for Dads Over 60 That He'll Actually Use (Not Return)",
+    prompt: `Create a 7-minute YouTube video with 12 scenes. Total word count must be 1,000 words minimum. Do not summarize — write full voiceover for every scene.
+
+VIDEO TITLE: Fitness Gifts for Dads Over 60 That He'll Actually Use (Not Return)
+
+CHANNEL TONE: Warm, knowledgeable, practical. Like advice from a trusted friend who knows fitness and genuinely cares about healthy aging.
+
+BACKGROUND MUSIC: Calm, warm, motivational. Subtle. Never overpowers the voiceover.
+
+SCENE 1 — HOOK [0:00-0:35] [60 words]
+Voiceover: Most Father's Day gifts for active dads over 60 end up in a drawer by July. Resistance bands. Foam rollers. Another fitness tracker he does not know how to use. Today I am showing you 5 gifts specifically designed for dads who are staying active — and every single one of them will actually get used.
+Visuals: Montage of unused fitness equipment in corners and closets. Then pivot to premium gift boxes and active older adults outdoors.
+
+SCENE 2 — THE PROBLEM [0:35-1:10] [55 words]
+Voiceover: Here is what most people get wrong. They buy fitness equipment without thinking about where dad actually is in his journey. A 62 year old who walks 3 miles a day does not need a pull-up bar. He needs gifts that support the active lifestyle he already has and make him feel seen.
+Visuals: Active older dad walking, stretching, gardening. Side-by-side: wrong gift vs right gift graphic overlay.
+
+SCENE 3 — GIFT 1: WATCH $89.95 [1:10-2:00] [70 words]
+Voiceover: Gift number one — and this is my top pick for active dads. This black chronograph watch does double duty. It looks incredible at dinner and motivates him to stay moving every single day. Under 90 dollars. Comes in a mahogany luxury gift box. For the dad who does not want a smartwatch full of notifications — just something that looks and feels premium.
+Visuals: Watch on wrist during a walk outdoors, mahogany box opening, close-up of watch face, price badge $89.95.
+
+SCENE 4 — GIFT 2: LEATHER JOURNAL $29.95 [2:00-2:45] [65 words]
+Voiceover: Gift number two — and this one might surprise you. Active dads over 60 who journal their workouts, their goals, and their progress stay consistent longer. That is not a motivational quote — that is what the research shows. This premium leather journal under 30 dollars ships gift-packaged and gives him somewhere to track the journey.
+Visuals: Journal open with handwritten workout notes, quality leather cover close-up, pen writing, gift packaging, price badge $29.95.
+
+SCENE 5 — GIFT 3: DAD BRACELET $44.95 [2:45-3:30] [60 words]
+Voiceover: Gift number three — for the active dad who actually wears jewelry. This two-tone stainless steel bracelet is adjustable so it fits comfortably during workouts. Will not interfere with anything. Arrives in a gift box with Love You Forever on the clasp. Under 45 dollars. The kind of thing he wears every single day.
+Visuals: Bracelet on wrist during light stretching, adjustable clasp detail, gift box reveal, active lifestyle shots, price badge $44.95.
+
+SCENE 6 — FITNESS TIP MID-ROLL [3:30-4:00] [50 words]
+Voiceover: Quick tip for any dad over 60 watching this — the single most important thing you can do for your fitness right now is stay consistent with whatever you enjoy. Not perfect. Consistent. Subscribe to this channel because every week I share practical fitness content specifically for people over 50.
+Visuals: Active older adults in various activities, subscribe animation overlay, channel logo.
+
+SCENE 7 — GIFT 4: LED ACRYLIC PLAQUE $39.95 [4:00-4:45] [65 words]
+Voiceover: Gift number four — this one is for the dad who keeps his workout space or home office motivating. This LED acrylic plaque glows beautifully and sits as a daily reminder of why he keeps going. Under 40 dollars. Sentimental without being over the top. The kind of gift that means more every time he looks at it.
+Visuals: Plaque glowing in a home gym corner, desk setting, LED base close-up, family photo framing, price badge $39.95.
+
+SCENE 8 — GIFT 5: ENGRAVED DOG TAG $54.95 [4:45-5:30] [65 words]
+Voiceover: Gift number five — the most personal gift on this list. A custom engraved military style dog tag with his name, a meaningful date, or a message from your family. Active dads actually wear these. Stainless steel so it lasts forever. Under 55 dollars. Bold, personal, and completely unique to your dad.
+Visuals: Dog tag engraving detail, military chain, active outdoor lifestyle, name engraving close-up, price badge $54.95.
+
+SCENE 9 — WHAT NOT TO BUY [5:30-6:00] [50 words]
+Voiceover: Quick note on what to skip. Avoid anything that requires him to learn new technology, anything that implies he needs to lose weight, and anything that will sit unused after the first week. The best gifts for active dads over 60 support who he already is — not who you think he should become.
+Visuals: Side-by-side graphic — wrong gifts crossed out vs right gifts checked. Simple clean overlay design.
+
+SCENE 10 — ORDER DEADLINE [6:00-6:25] [40 words]
+Voiceover: Every gift I mentioned today ships in time for Father's Day — but you need to order by June 14th. That is the cutoff. After that delivery is not guaranteed. Links to everything are in the description below.
+Visuals: Calendar June 14 circled, all 5 products in grid, shipping box graphic.
+
+SCENE 11 — HEALTH TIE-IN [6:25-6:45] [40 words]
+Voiceover: And if Dad is working on his fitness this summer — or if you are — subscribe to this channel. Every week I share practical fitness content for people over 50 that actually works in real life.
+Visuals: Active older adults montage, channel content preview clips, subscribe animation.
+
+SCENE 12 — CLOSE [6:45-7:00] [30 words]
+Voiceover: Thanks for watching. Links are in the description. See you in the next one.
+Visuals: End screen, subscribe button, related video thumbnail, description link highlight.`
+  },
+  {
+    id: 'cmr',
+    name: 'CryptoMinersRigs',
+    ytTitle: "I Spent $200 on Father's Day Gifts — Here's My Honest Results (2026)",
+    prompt: `Create a 7-minute YouTube video with 12 scenes. Total word count must be 1,000 words minimum. Do not summarize — write full voiceover for every scene.
+
+VIDEO TITLE: I Spent $200 on Father's Day Gifts — Here's My Honest Results (2026)
+
+CHANNEL TONE: Direct, skeptical, honest. Like a hardware reviewer who tests everything with real numbers and no hype. Same energy as a mining rig unboxing.
+
+BACKGROUND MUSIC: Minimal, slightly techy. Low volume. Never distracts from the content.
+
+SCENE 1 — HOOK [0:00-0:35] [60 words]
+Voiceover: I put 200 dollars into Father's Day gifts the same way I would put 200 dollars into a mining rig — with zero sentimentality and a spreadsheet. Five products. Real expectations. Honest results. Here is exactly what I found and whether any of it is actually worth your stack.
+Visuals: Spreadsheet graphic with product names and prices filling in. Then cut to products laid out on a desk like a hardware test bench.
+
+SCENE 2 — TEST PARAMETERS [0:35-1:10] [55 words]
+Voiceover: My criteria going in: under 90 dollars per item, ships gift-ready so I do not have to wrap anything myself, and something a tech-minded dad would actually use — not novelty garbage that sits in a drawer. Five products tested. Let me walk you through each one with a verdict.
+Visuals: Criteria checklist appearing on screen one by one. Clean data-style graphics. Green checkmarks.
+
+SCENE 3 — PRODUCT 1: WATCH $89.95 — VERDICT PASS [1:10-2:00] [70 words]
+Voiceover: Product one — chronograph watch at 89 dollars and 95 cents. My expectations going in were low. Actual quality — genuinely surprised. The mahogany gift box alone looks premium. The watch face is clean, the weight feels right, and for a tech dad who does not want a smartwatch full of notifications — this holds up. Verdict: Pass.
+Visuals: Watch unboxing on desk, close-up of face and weight, mahogany box detail, green PASS badge overlay, price $89.95.
+
+SCENE 4 — PRODUCT 2: LEATHER WALLET $69.95 — VERDICT PASS [2:00-2:45] [65 words]
+Voiceover: Product two — full grain leather wallet at 69 dollars and 95 cents. Slim profile, ships in a gift box, card slots are solid. The kind of thing miners and traders who carry physical cards actually use every day. No gimmicks. Just a well built wallet. Verdict: Pass.
+Visuals: Wallet quality inspection on desk, card slot test, slim profile measurement, gift box, green PASS badge, price $69.95.
+
+SCENE 5 — PRODUCT 3: ENGRAVED DOG TAG $54.95 — VERDICT PASS [2:45-3:30] [60 words]
+Voiceover: Product three — custom engraved military dog tag at 54 dollars and 95 cents. Stainless steel, custom engraving, military chain. Tech dads actually wear these. Passed the durability scratch test. Passed the gift presentation test. Personal enough to mean something, tough enough to last. Verdict: Pass.
+Visuals: Dog tag durability test on desk, engraving close-up, scratch resistance demo, green PASS badge, price $54.95.
+
+SCENE 6 — AFFILIATE NATURAL INSERT [3:30-4:00] [50 words]
+Voiceover: Side note — if you are mining or stacking crypto and you want to protect your digital assets, your hardware wallet security matters as much as your physical one. I use a Ledger — link in the description. Also VidIQ if you are building YouTube income alongside your mining operation.
+Visuals: Ledger hardware wallet, VidIQ dashboard screenshot, description link highlight graphic.
+
+SCENE 7 — PRODUCT 4: LED ACRYLIC PLAQUE $39.95 — VERDICT CONDITIONAL PASS [4:00-4:45] [65 words]
+Voiceover: Product four — LED acrylic plaque at 39 dollars and 95 cents. I will be honest — I did not expect to like this one. The LED base is cleaner than I expected. The glow is actually solid. For a home office or mining setup it works. Depends entirely on your dad's aesthetic. Verdict: Conditional Pass.
+Visuals: Plaque glowing in dark room, LED base quality check, desk setup comparison, amber CONDITIONAL PASS badge, price $39.95.
+
+SCENE 8 — PRODUCT 5: LEATHER JOURNAL $29.95 — VERDICT BEST VALUE [4:45-5:30] [65 words]
+Voiceover: Product five — leather journal at 29 dollars and 95 cents. Best value in the entire test. Premium finish, gift packaged, and honestly — every miner who is serious about their operation should be journaling their strategy, their hardware decisions, and their profitability numbers anyway. Strongest value per dollar in this test. Verdict: Best Value.
+Visuals: Journal quality inspection, pages close-up, stitching detail, strategy notes written inside, gold BEST VALUE badge, price $29.95.
+
+SCENE 9 — FINAL SCORECARD [5:30-6:00] [50 words]
+Voiceover: Final scorecard. Five products tested. Four passes. One best value. Zero failures out of 200 dollars spent. That is a better ROI than most mining rigs I have tested this year. Every link is in the description below. Order by June 14th for Father's Day delivery.
+Visuals: Full scorecard graphic — all 5 products with verdict badges. Total spend $200 displayed. June 14 deadline.
+
+SCENE 10 — WHO THESE ARE BEST FOR [6:00-6:25] [40 words]
+Voiceover: Best picks by type — the watch for the dad who appreciates quality. The wallet for the practical dad. The dog tag for the sentimental one. The journal for the strategic thinker. The plaque for the one who needs a reminder of what matters.
+Visuals: Each product with a dad type label. Clean split-screen graphic.
+
+SCENE 11 — URGENCY + LINKS [6:25-6:45] [35 words]
+Voiceover: All five ship before Father's Day if you order by June 14th. Links to every product are in the description. Do not wait on this one — shipping windows close fast.
+Visuals: Countdown calendar, all products grid, description arrow graphic, June 14 deadline badge.
+
+SCENE 12 — CLOSE [6:45-7:00] [30 words]
+Voiceover: If this kind of honest breakdown is useful to you, subscribe. I test gear so you do not waste your stack. See you in the next one.
+Visuals: Subscribe animation, end screen, related video thumbnail, channel logo.`
+  }
+];
+
+const checks = [
+  'Title matches proven channel formula',
+  'Shopify collection URL in description',
+  'VidIQ affiliate link in description',
+  'Timestamps added (5+ chapters)',
+  'Tags added (8-12 tags)',
+  'Thumbnail uploaded to YouTube',
+  'End screen added (subscribe + related)',
+  'Pinned comment with Shopify link',
+  'Video scheduled (Mon/Tue/Wed)',
+  'Pinterest pin created from thumbnail',
+];
+
+let checkState = checks.map(() => false);
+let activeChannel = 0;
+
+function renderTabs() {
+  const t = document.getElementById('tabs');
+  t.innerHTML = '';
+  channels.forEach((ch, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (i === activeChannel ? ' active' : '');
+    btn.textContent = ch.id.toUpperCase();
+    btn.onclick = () => { activeChannel = i; renderTabs(); renderPrompt(); };
+    t.appendChild(btn);
+  });
+}
+
+function renderPrompt() {
+  const ch = channels[activeChannel];
+  const card = document.getElementById('promptCard');
+  card.innerHTML = `
+    <div class="prompt-header">
+      <div class="prompt-meta">
+        <div class="prompt-channel">${ch.name}</div>
+        <div class="prompt-title">${ch.ytTitle}</div>
+      </div>
+      <div class="prompt-actions">
+        <button class="copy-btn" id="copyTitleBtn" onclick="copyTitle()">Copy title</button>
+        <button class="copy-all-btn" id="copyBtn" onclick="copyPrompt()">⎘ Copy prompt</button>
+      </div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-text" id="promptText">${ch.prompt}</div>
+    </div>
+  `;
+}
+
+function copyPre() {
+  const text = document.getElementById('prePromptText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyPreBtn');
+    btn.textContent = '✓ Copied!';
+    const msg = document.getElementById('preCopied');
+    msg.style.display = 'inline';
+    setTimeout(() => { btn.textContent = '⎘ Copy pre-prompt'; msg.style.display = 'none'; }, 2500);
+  });
+}
+
+function copyPrompt() {
+  navigator.clipboard.writeText(channels[activeChannel].prompt).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy prompt'; btn.classList.remove('copied'); }, 2500);
+  });
+}
+
+function copyTitle() {
+  navigator.clipboard.writeText(channels[activeChannel].ytTitle).then(() => {
+    const btn = document.getElementById('copyTitleBtn');
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy title'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function renderChecks() {
+  const done = checkState.filter(Boolean).length;
+  document.getElementById('checkedCount').textContent = done + '/' + checks.length;
+  const grid = document.getElementById('checkGrid');
+  grid.innerHTML = '';
+  checks.forEach((c, i) => {
+    const item = document.createElement('div');
+    item.className = 'check-item' + (checkState[i] ? ' done' : '');
+    item.innerHTML = `<div class="check-box">${checkState[i] ? '✓' : ''}</div><div class="check-label">${c}</div>`;
+    item.onclick = () => { checkState[i] = !checkState[i]; renderChecks(); };
+    grid.appendChild(item);
+  });
+}
+
+function resetChecks() {
+  checkState = checks.map(() => false);
+  renderChecks();
+}
+
+renderTabs();
+renderPrompt();
+renderChecks();
+</script>
+</body>
+</html>
